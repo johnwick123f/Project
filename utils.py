@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 import os
-
+import requests
 def image_loader(image, to_format):
     """
     Load an image from path, NumPy array, or PIL Image object and convert it to the specified format.
@@ -16,8 +16,11 @@ def image_loader(image, to_format):
         Converted image in the specified format.
     """
     # Load the image
-    if isinstance(image, str):  # If image is a file path
-        img = Image.open(image)
+    if isinstance(image, str):
+        if str.startswith("http"):
+            img = Image.open(requests.get(image, stream=True).raw)
+        else:
+            img = Image.open(image)
     elif isinstance(image, np.ndarray):  # If image is a NumPy array
         img = Image.fromarray(image)
     elif isinstance(image, Image.Image):  # If image is a PIL Image object
