@@ -35,16 +35,20 @@ class GroundingSAM:
 
         boxes, logits, phrases = predict(model=self.grounding_model,image=image,caption=text,box_threshold=0.35,text_threshold=0.35)
         return boxes, logits, phrases, image_source
-    def sam_dino(self, text, image):
+    def sam_dino(self, text, image, binary=False):
         boxes, logits, phrases, image_source = grounding(text, image)
         masks = []
         cimage = cv2.cvtColor(cv2.imread(image), cv2.COLOR_BGR2RGB)
         source_h, source_w, _ = cimage.shape
-        predictor.set_image(cimage)
+        self.predictor.set_image(cimage)
         boxes3 = boxes * torch.Tensor([source_w, source_h, source_w, source_h])
         xyxy = box_convert(boxes=boxes3, in_fmt="cxcywh", out_fmt="xyxy").numpy()
         for box in xyxy:
             box = np.array(box)
             mask = segment(box)### MIGHT HAVE TO CHANGE!!!!
             masks.append(mask)
-        return masks, xyxy, logits, phrases, image_source
+        if binary == True:
+            binary_mask = masks[0].astype(np.uint8)*255
+            return binary_mask, xyxy, logits, phrases, image_source
+        else:
+            return masks, xyxy, logits, phrases, image_source
