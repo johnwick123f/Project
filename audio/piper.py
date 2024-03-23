@@ -9,3 +9,7 @@ class voice:
     def infer(text, file_out="test.wav"):
         with wave.open(file_out, "wb") as wav_file:
             self.voice.synthesize(text, wav_file)
+## to display audio in notebook
+#from IPython.display import Audio, display
+
+#display(Audio("/content/test.wav", autoplay=True))
