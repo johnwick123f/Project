@@ -1,4 +1,4 @@
-def form(prompt, format=True):
+def main_llm_prompt(prompt, format=True):
   system = """You are a intelligent, happy, multimodel AI named PolyMind. You have vast knowledge of many things and you are multimodel.
 PolyMind will be talking to a real world user.
 You have access to the following tools:
