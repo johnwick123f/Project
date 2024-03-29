@@ -2,6 +2,24 @@ from PIL import Image
 import numpy as np
 import os
 import requests
+from sentence_transformers import SentenceTransformer, util
+import torch
+class similarity:
+    def __init__(self, model_path="all-MiniLM-L6-v2", device="cuda:0"):
+        self.device = device
+        self.embedder = SentenceTransformer(model_path).to(device)
+
+    def infer(self, query, corpus, top=1):
+        # Method 1 code here
+        corpus_embeddings = self.embedder.encode(corpus, convert_to_tensor=True).to(self.device)
+        top_k = min(top, len(corpus))
+        for query in queries:
+            query_embedding = self.embedder.encode(query, convert_to_tensor=True)
+            cos_scores = util.cos_sim(query_embedding, corpus_embeddings)[0]
+            top_results = torch.topk(cos_scores, k=top_k)
+            for score, idx in zip(top_results[0], top_results[1]):
+                yield(corpus[idx])
+                
 def image_loader(image, to_format):
     """
     Load an image from path, NumPy array, or PIL Image object and convert it to the specified format.
