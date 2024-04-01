@@ -1,0 +1,5 @@
+trafilatura## for web scraping
+duckduckgo_search## text, image, videa search
+sentence_transformers## similarity
+transformers## obviously important
+
