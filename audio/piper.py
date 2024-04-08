@@ -1,3 +1,4 @@
+## USELESS NOW, STYLETTS IS SIMILAR SPEED BUT VOICE CLONING + HIGHER QUALITY
 ## audio generation from text. fast and ezy
 from piper import PiperVoice
 import wave
