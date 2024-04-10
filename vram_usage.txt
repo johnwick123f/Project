@@ -1,0 +1,3 @@
+PerFlow Stable Diffusion:
+- Without TinyVAE: 3.4gb vram
+- With TinyVAE(not reccomended): 3 gb vram
