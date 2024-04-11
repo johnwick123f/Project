@@ -7,6 +7,7 @@ import torch
 
 from transformers import MusicgenForConditionalGeneration, MusicgenProcessor, set_seed
 from transformers.generation.streamers import BaseStreamer
+
 class MusicgenStreamer(BaseStreamer):
     def __init__(
         self,
@@ -16,33 +17,9 @@ class MusicgenStreamer(BaseStreamer):
         stride: Optional[int] = None,
         timeout: Optional[float] = None,
     ):
-        """
-        Streamer that stores playback-ready audio in a queue, to be used by a downstream application as an iterator. This is
-        useful for applications that benefit from accessing the generated audio in a non-blocking way (e.g. in an interactive
-        Gradio demo).
-        Parameters:
-            model (`MusicgenForConditionalGeneration`):
-                The MusicGen model used to generate the audio waveform.
-            device (`str`, *optional*):
-                The torch device on which to run the computation. If `None`, will default to the device of the model.
-            play_steps (`int`, *optional*, defaults to 10):
-                The number of generation steps with which to return the generated audio array. Using fewer steps will 
-                mean the first chunk is ready faster, but will require more codec decoding steps overall. This value 
-                should be tuned to your device and latency requirements.
-            stride (`int`, *optional*):
-                The window (stride) between adjacent audio samples. Using a stride between adjacent audio samples reduces
-                the hard boundary between them, giving smoother playback. If `None`, will default to a value equivalent to 
-                play_steps // 6 in the audio space.
-            timeout (`int`, *optional*):
-                The timeout for the audio queue. If `None`, the queue will block indefinitely. Useful to handle exceptions
-                in `.generate()`, when it is called in a separate thread.
-        """
-        self.music_model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-small", torch_dtype=torch.float16).eval()
-        self.music_processor = MusicgenProcessor.from_pretrained("facebook/musicgen-small")
-
-        self.decoder = self.music_model.decoder
-        self.audio_encoder = self.music_model.audio_encoder
-        self.generation_config = self.music_model.generation_config
+        self.decoder = model.decoder
+        self.audio_encoder = model.audio_encoder
+        self.generation_config = model.generation_config
         self.device = device if device is not None else model.device
 
         # variables used in the streaming process
@@ -127,34 +104,33 @@ class MusicgenStreamer(BaseStreamer):
             raise StopIteration()
         else:
             return value
-    def infer(text_prompt, audio_length_in_s=10.0, play_steps_in_s=2.0, seed=0):
-        sampling_rate = self.music_model.audio_encoder.config.sampling_rate
-        frame_rate = self.music_model.audio_encoder.config.frame_rate
-        target_dtype = np.int16
-        max_range = np.iinfo(target_dtype).max
-        max_new_tokens = int(frame_rate * audio_length_in_s)
-        play_steps = int(frame_rate * play_steps_in_s)
-        device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        if device != model.device:
-            model.to(device)
-            if device == "cuda:0":
-                model.half()
+class music_gen:
+    def __init__(self):
+        self.model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-small", torch_dtype=torch.float16).to("cuda:0")
+        self.processor = MusicgenProcessor.from_pretrained("facebook/musicgen-small")
+        self.sampling_rate = self.model.audio_encoder.config.sampling_rate
+        self.frame_rate = self.model.audio_encoder.config.frame_rate
+        self.target_dtype = np.int16
+        self.max_range = np.iinfo(self.target_dtype).max
 
-        inputs = self.music_processor(
+    def generate_audio(self, text_prompt, audio_length_in_s=10.0, play_steps_in_s=2.0, seed=0):
+        max_new_tokens = int(self.frame_rate * audio_length_in_s)
+        play_steps = int(self.frame_rate * play_steps_in_s)
+        inputs = self.processor(
             text=text_prompt,
             padding=True,
             return_tensors="pt",
         )
-        streamer = MusicgenStreamer(model, device=device, play_steps=play_steps)
+        streamer = MusicgenStreamer(self.model, device="cuda:0", play_steps=play_steps)
         generation_kwargs = dict(
-            **inputs.to(device),
+            **inputs.to("cuda:0"),
             streamer=streamer,
             max_new_tokens=max_new_tokens,
         )
-        thread = Thread(target=model.generate, kwargs=generation_kwargs)
+        thread = Thread(target=self.model.generate, kwargs=generation_kwargs)
         thread.start()
         set_seed(seed)
         for new_audio in streamer:
-            print(f"Sample of length: {round(new_audio.shape[0] / sampling_rate, 2)} seconds")
-            new_audio = (new_audio * max_range).astype(np.int16)
-            yield sampling_rate, new_audio
+            print(f"Sample of length: {round(new_audio.shape[0] / self.sampling_rate, 2)} seconds")
+            new_audio = (new_audio * self.max_range).astype(np.int16)
+            yield self.sampling_rate, new_audio
