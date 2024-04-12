@@ -27,3 +27,9 @@ Vram:
 - 4.9gb vram
 Speed:
 - 40 tokens per second(0.75 tokens = 1 word)
+## AudioLDM2
+Description: generates music and sounds. nice quality
+Vram:
+- 2.7gb vram? or 2.3 i forgot
+Speed:
+2 seconds for 10 seconds of audio. Incredibly fast(much faster then musicgen)
