@@ -1,16 +1,16 @@
-## USELESS NOW, STYLETTS IS SIMILAR SPEED BUT VOICE CLONING + HIGHER QUALITY
-## audio generation from text. fast and ezy
-from piper import PiperVoice
-import wave
+## better alternative to musicgen. Only takes 2 seconds and slightly better then it? slightly more vram tho
 
-class voice:
-    def __init__(self, model='/content/en_US-lessac-high.onnx', config='/content/en_US-lessac-high.onnx.json'):
-        self.voice = PiperVoice.load(model, config_path=config)
+from diffusers import AudioLDM2Pipeline
+import torch
+from diffusers import DPMSolverMultistepScheduler
+
+class audio_generation:
+    def __init__(self, model_path="cvssp/audioldm2"):  # Constructor
+        self.pipe = AudioLDM2Pipeline.from_pretrained(model_path, torch_dtype=torch.float16).to("cuda:0")
+        self.pipe.scheduler = DPMSolverMultistepScheduler.from_config(self.pipe.scheduler.config)
     
-    def infer(text, file_out="test.wav"):
-        with wave.open(file_out, "wb") as wav_file:
-            self.voice.synthesize(text, wav_file)
-## to display audio in notebook
-#from IPython.display import Audio, display
-
-#display(Audio("/content/test.wav", autoplay=True))
+    def infer(self, prompt, negative="low quality, average quality"):  # Another example method
+        # Method logic here
+        audio = self.pipe(prompt, num_inference_steps=20, audio_length_in_s=10.0, negative_prompt=negative).audios[0]
+        #Audio(audio, rate=16000)
+        return audio
