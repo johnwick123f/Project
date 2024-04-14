@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 from PIL import Image
-
+from io import StringIO
+import sys
 ## bit more specific libraries
 from diffusers.pipelines.stable_diffusion import StableDiffusionPipeline
 from src.scheduler_perflow import PeRFlowScheduler
@@ -85,6 +86,60 @@ class llm:
             else:
                 pass
         return full_out, out
+class tool_usage:
+    def __init__(self):
+        self.stable_diffusion = SDFast()## generates images
+        self.vision_model = moondream()## vqa and img captioning
+        self.search_engine = search()## searches web
+        self.audio_gen = audio_generation()## generatios music, and sounds
+        self.whisper_model = whisperHF()## transcribes audio to text
+        self.tts = style_tts()## generates speech from text
+    def split_variables(h, prefixes_to_remove):
+    # Remove specified prefixes from the string
+        for prefix in prefixes_to_remove:
+            h = h.replace(prefix, '')
+        h_split = h.split(',')
+        variables = [item.strip() for item in h_split]
+        return variables
+    def use_tools(self, action, arg):
+        if "image_gen" in action:
+            prefixes_to_remove = ['prompt=', 'num_images=']
+            result = split_variables(arg, prefixes_to_remove)
+            self.stable_diffusion.infer(result[0], int(result[1]))
+        elif "music_gen" in action:
+            prefixes_to_remove = ['description=', 'length=']
+            result = split_variables(arg, prefixes_to_remove)
+            self.audio_gen.infer(result[0], int(result[1])) 
+        elif "search_img" in action:
+            prefixes_to_remove = ['query=', 'num_img=']
+            result = split_variables(arg, prefixes_to_remove)
+            self.search_engine.search_images(result[0], int(result[1])) 
+        elif "plot_graph" in action:
+            prefixes_to_remove = ['graph=']
+            result = split_variables(arg, prefixes_to_remove)
+            plot_equation(result[0])
+        elif "search" in action:
+            prefixes_to_remove = ['query=']
+            result = split_variables(arg, prefixes_to_remove)
+            self.search_engine.search_text(result[0])  
+        elif "search_video" in action:
+            prefixes_to_remove = ['query=']
+            result = split_variables(arg, prefixes_to_remove)
+            self.search_engine.search_videos(result[0]) 
+        elif "math" in action:
+            prefixes_to_remove = ['equation=']
+            result = split_variables(arg, prefixes_to_remove)
+            answer = eval(result[0])
+            return str(answer)
+        elif "none" in action:
+            return True
+        elif "code" in action:
+            stdout_backup = sys.stdout
+            sys.stdout = StringIO()
+            exec("from PIL import Image; from IPython.display import display; display(Image.open('/content/trump.jpg'))")
+
+            
+            
         
 class function_chooser:
     def __init__(self, model_path):
