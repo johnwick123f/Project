@@ -1,5 +1,5 @@
 # took me literally the most time lol, simple function for estimation a place point. 
-import numpy
+import numpy as np
 
 def place_estimation(object_mask, surface_mask, proximity):
     # Convert object and surface masks to grayscale
