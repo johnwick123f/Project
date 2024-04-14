@@ -1,10 +1,38 @@
+## normal libraries
 import torch
 import re
 from llama_cpp.llama import Llama, LlamaGrammar
-from utils import Similarity, tool_usage
+from utils import Similarity
+import torch
+import torchvision
+import os
+import sympy as sp
+import matplotlib.pyplot as plt
+import numpy as np
+import cv2
+from PIL import Image
+
+## bit more specific libraries
+from diffusers.pipelines.stable_diffusion import StableDiffusionPipeline
+from src.scheduler_perflow import PeRFlowScheduler
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, AutoModelForCausalLM, AutoTokenizer
+from diffusers import AudioLDM2Pipeline, DPMSolverMultistepScheduler
+from styletts2 import tts
+from duckduckgo_search import DDGS
+from groundingdino.util.inference import load_model, load_image, predict, annotate
+from repvit_sam import sam_model_registry, SamPredictor
+from torchvision.ops import box_convert
+
+## custom files i made
+from multimodel.mllm import moondream
+from image_generation.perflowsd import SDFast
+from audio.AudioLDM2 import audio_generation
+from audio.voice import style_tts
+from audio.whisper import whisperHF
+from vision.plotter import plot_equation
+from web.search_web import search
 ## a class for inferencing with a llm(hermes pro 7b)
 class llm:
-
     def __init__(self, model_path, gpu_layers=-1, ctx=2048, grammar=None):
         self.language_model = Llama(model_path=model_path, n_gpu_layers=gpu_layers, n_ctx=ctx)
 
@@ -57,7 +85,7 @@ class llm:
             else:
                 pass
         return full_out, out
-
+        
 class function_chooser:
     def __init__(self, model_path):
         print("Initializing Function Chooser CLASS.")
