@@ -94,6 +94,7 @@ class tool_usage:
         self.audio_gen = audio_generation()## generatios music, and sounds
         self.whisper_model = whisperHF()## transcribes audio to text
         self.tts = style_tts()## generates speech from text
+
     def split_variables(h, prefixes_to_remove):
     # Remove specified prefixes from the string
         for prefix in prefixes_to_remove:
@@ -104,43 +105,61 @@ class tool_usage:
     def use_tools(self, action, arg):
         if "image_gen" in action:
             prefixes_to_remove = ['prompt=', 'num_images=']
-            result = split_variables(arg, prefixes_to_remove)
-            self.stable_diffusion.infer(result[0], int(result[1]))
+            result = self.split_variables(arg, prefixes_to_remove)
+            images = self.stable_diffusion.infer(result[0], int(result[1]))
+            return imagse, "image_gen"
         elif "music_gen" in action:
             prefixes_to_remove = ['description=', 'length=']
-            result = split_variables(arg, prefixes_to_remove)
-            self.audio_gen.infer(result[0], int(result[1])) 
+            result = self.split_variables(arg, prefixes_to_remove)
+            audio = self.audio_gen.infer(result[0], int(result[1])) 
+            return audio, "music_gen"
         elif "search_img" in action:
             prefixes_to_remove = ['query=', 'num_img=']
-            result = split_variables(arg, prefixes_to_remove)
-            self.search_engine.search_images(result[0], int(result[1])) 
+            result = self.split_variables(arg, prefixes_to_remove)
+            images = self.search_engine.search_images(result[0], int(result[1])) 
+            return images, "search_img"
         elif "plot_graph" in action:
             prefixes_to_remove = ['graph=']
-            result = split_variables(arg, prefixes_to_remove)
-            plot_equation(result[0])
+            result = self.split_variables(arg, prefixes_to_remove)
+            graph = plot_equation(result[0])
+            return graph, "plot_graph"
         elif "search" in action:
             prefixes_to_remove = ['query=']
-            result = split_variables(arg, prefixes_to_remove)
-            self.search_engine.search_text(result[0])  
+            result = self.split_variables(arg, prefixes_to_remove)
+            text = self.search_engine.search_text(result[0])
+            return text, "search"
         elif "search_video" in action:
+            action_type = "search_video"
             prefixes_to_remove = ['query=']
-            result = split_variables(arg, prefixes_to_remove)
-            self.search_engine.search_videos(result[0]) 
+            result = self.split_variables(arg, prefixes_to_remove)
+            videos = self.search_engine.search_videos(result[0]) 
+            return videos, action_type
         elif "math" in action:
+            action_type = "math"
             prefixes_to_remove = ['equation=']
-            result = split_variables(arg, prefixes_to_remove)
+            result = self.split_variables(arg, prefixes_to_remove)
             answer = eval(result[0])
-            return str(answer)
+            return str(answer), action_type="math"
         elif "none" in action:
-            return True
+            action_type = "none"
+            return True, action_type
         elif "code" in action:
+            prefixes_to_remove = ['code=']
+            result = self.split_variables(arg, prefixes_to_remove)
             stdout_backup = sys.stdout
             sys.stdout = StringIO()
-            exec("from PIL import Image; from IPython.display import display; display(Image.open('/content/trump.jpg'))")
-
+            exec(str(result[0]))
+            console_output = sys.stdout.getvalue()
+            action_type = "code"
+            return str(console_output), action_type
+        elif "current_news" in action:
+            action_type = "current_news"
+            prefixes_to_remove = ['query=']
+            result = self.split_variables(arg, prefixes_to_remove)
+            titles, bodies, images = self.search_engine.search_news(result[0])
+            return titles, bodies, images, action_type
             
-            
-        
+                  
 class function_chooser:
     def __init__(self, model_path):
         print("Initializing Function Chooser CLASS.")
