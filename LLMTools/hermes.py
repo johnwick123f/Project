@@ -1,7 +1,7 @@
 import torch
 import re
 from llama_cpp.llama import Llama, LlamaGrammar
-        
+from utils import Similarity
 ## a class for inferencing with a llm(hermes pro 7b)
 class llm:
 
@@ -61,7 +61,7 @@ class llm:
 class function_chooser:
     def __init__(self, model_path):
         print("Initializing Function Chooser CLASS.")
-        self.nous_hermes = llm(model_path)### CHANGE MODEL PATH
+        self.nous_hermes = llm(model_path)
         self.similar = Similarity()
 
     def format_prompt(self, user_prompt, functions, name, personality, previous_prompts=None, previous_answers=None):
