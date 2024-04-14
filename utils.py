@@ -4,6 +4,8 @@ import os
 import requests
 from sentence_transformers import SentenceTransformer, util
 import torch
+import re
+## A class for using a sentence embedder model to find similar sentences(can be used for classification, clustering and more) 
 class Similarity:
     # Class variable to store the loaded model
     embedder = None
@@ -17,26 +19,16 @@ class Similarity:
     def infer(self, queries, corpus, top=1):
         corpus_embeddings = Similarity.embedder.encode(corpus, convert_to_tensor=True).to(self.device)
         top_k = min(top, len(corpus))
+        results=[]
         for query in queries:
             query_embedding = Similarity.embedder.encode(query, convert_to_tensor=True).to(self.device)
             cos_scores = util.cos_sim(query_embedding, corpus_embeddings)[0]
             top_results = torch.topk(cos_scores, k=top_k)
             for score, idx in zip(top_results[0], top_results[1]):
-                yield corpus[idx]
-                
+                results.append(corpus[idx])
+        return results
+# loads any sort of image but kinda useless                
 def image_loader(image, to_format):
-    """
-    Load an image from path, NumPy array, or PIL Image object and convert it to the specified format.
-
-    Parameters:
-        image: str, np.ndarray, PIL.Image.Image
-            The input image, which can be a file path, NumPy array, or PIL Image object.
-        to_format: str
-            The format to convert the image to. Can be one of 'path', 'np', or 'pil'.
-
-    Returns:
-        Converted image in the specified format.
-    """
     # Load the image
     if isinstance(image, str):
         if str.startswith("http"):
