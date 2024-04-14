@@ -1,3 +1,4 @@
+## don't use, audiolm2 is better and way faster(2 sec). although audiolm2 takes slightly more vram
 from queue import Queue
 from threading import Thread
 from typing import Optional
