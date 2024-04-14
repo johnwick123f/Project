@@ -88,7 +88,7 @@ class llm:
         return full_out, out
 class tool_usage:
     def __init__(self):
-        self.stable_diffusion = SDFast()## generates images
+       # self.stable_diffusion = SDFast()## generates images
         self.vision_model = moondream()## vqa and img captioning
         self.search_engine = search()## searches web
         self.audio_gen = audio_generation()## generatios music, and sounds
