@@ -1,7 +1,7 @@
 import torch
 import re
 from llama_cpp.llama import Llama, LlamaGrammar
-from utils import Similarity
+from utils import Similarity, tool_usage
 ## a class for inferencing with a llm(hermes pro 7b)
 class llm:
 
@@ -43,7 +43,7 @@ class llm:
                     full_out += f"Observation: {answer}\n"
                     print(f"Observation: {answer}\n", end="")
                     break
-                elif "Final response" in full_out or token == "":
+                elif "Final response:" in full_out or token == "":
                     out += token
                     print(token, end="")
                 else:
@@ -52,7 +52,7 @@ class llm:
                     print(token, end="")
             print(full_out)
             print("\n\n=============NEW FULL OUT===============")
-            if "Final response" in full_out or token == "":
+            if "Final response:" in full_out or token == "":
                 break
             else:
                 pass
