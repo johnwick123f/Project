@@ -52,3 +52,13 @@ class search:
         for img in results:
             images.append((f'<img src="{img["image"]}">'))   
         return images
+    def search_news(self, keywords, region="us-en", safesearch="off", timelimit="m", max_results=5):
+        results = self.ddgs.news(keywords=keywords, region=region, safesearch=safesearch, timelimit=timelimit, max_results=max_results)
+        titles = []
+        bodies = []
+        images = []
+        for result in results:
+            titles.append(result['title'])
+            bodies.append(result['body'])
+            images.append(result['image'])
+        return titles, bodies, images
