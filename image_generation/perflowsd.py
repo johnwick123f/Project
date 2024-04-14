@@ -13,6 +13,8 @@ class SDFast:
 
     def infer(self, prompt, num_images=1, mode="portrait", guidance=7.5, num_steps=8, neg="worst quality"):
         #prompt = [f"RAW photo, 8k uhd, dslr, high quality, film grain, highly detailed, (masterpiece), cinematic, vivid colors, intricate masterpiece, golden ratio, highly detailed; {prompt}"]
+        if num_images = None:
+            num_images = 1
         prompt = [f"{prompt}((8k, RAW photo, highest quality, masterpiece), High detail RAW color photo professional close-up photo, (realistic, photo realism:1.4), (highest quality), (best shadow), (best illustration), ultra high resolution, highly detailed CG unified 8K wallpapers, physics-based rendering, cinematic lighting)"]
         neg_prompt = [f"lowres, cropped, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, out of frame, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, "]
         if mode == "portrait":
