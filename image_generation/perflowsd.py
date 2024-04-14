@@ -5,8 +5,8 @@ import os
 #%cd piecewise-rectified-flow
 from src.scheduler_perflow import PeRFlowScheduler
 class SDFast:
-    def __init__(self):
-        self.pipe = StableDiffusionPipeline.from_pretrained("hansyan/perflow-sd15-dreamshaper", torch_dtype=torch.float16, device="cuda:0", safety_checker=None)
+    def __init__(self, model_path="hansyan/perflow-sd15-dreamshaper"):
+        self.pipe = StableDiffusionPipeline.from_pretrained(model_path, torch_dtype=torch.float16, device="cuda:0", safety_checker=None)
         self.pipe.scheduler = PeRFlowScheduler.from_config(self.pipe.scheduler.config, prediction_type="epsilon", num_time_windows=4)
         self.pipe.safety_checker = None
         self.pipe.to(torch.float16, device="cuda:0")
